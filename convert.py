@@ -54,22 +54,20 @@ def read_messages(dbfile):
     db = sqlite3.Connection(dbfile)
     
     c = db.cursor()
-    c.execute("SELECT COUNT(*) FROM sms")
+    c.execute("SELECT COUNT(*) FROM mmssms")
     count = c.fetchone()[0]
 
     smses = etree.Element("smses", attrib={"count": str(count)})
-    c.execute("SELECT address, date, protocol, read, status, type, subject, body, service_center, locked FROM sms ORDER BY date DESC")
+    c.execute("SELECT address, date, read,  type, subject, body FROM mmssms ORDER BY date DESC")
     while True:
         row = c.fetchone()
         if row is None: break
 
-        address, date, protocol, read, status, type, subject, body, service_center, locked = row
+        address, date, read,  type, subject, body = row
 
-        if protocol is None:
-            protocol = 0
 
         sms = etree.Element("sms", attrib={
-            "protocol": v(protocol),
+            "protocol": "0",
             "address": v(address),
             "date": v(date),
             "type": v(type),
@@ -77,10 +75,10 @@ def read_messages(dbfile):
             "body": v(body),
             # toa
             # sc_toa
-            "service_center": v(service_center),
+            "service_center": "null",
             "read": v(read),
-            "status": v(status),
-            "locked": v(locked),
+            "status": "-1",
+            "locked": "0",
             "readable_date": datetime.datetime.fromtimestamp(date/1000).strftime(datefmt),
             })
         smses.append(sms)
